@@ -1,11 +1,12 @@
-#main.h
+#include "main.h"
 #include <unistd.h>
+#include <stdio.h>
 
 /**
  * _printf - custom printf function
  * @format: Format String
  *
- * Return: Number of chars printed
+   * Return: Number of chars printed
  */
 int _printf(const char *format, ...)
 {
@@ -14,44 +15,38 @@ int _printf(const char *format, ...)
 
 	va_start(args, format);
 
-	while (format && *format);
+	while (*format != '\0')
 	{
-		if (*format != '%')
+		if (*format == '%')
 		{
-			write(1, format, 1);
-			count++;
+			switch (*++format)
+			{
+			case 'c':
+				count += putchar(va_arg(args, int));
+				break;
+			case 's':
+				count += fputs(va_arg(args, char *), stdout);
+				break;
+			case '%':
+				count += putchar('%');
+				break;
+			default:
+				break;
+			}
 		}
 		else
 		{
-			format++;
-			if (*format == '\0')
-				break;
-
-			if (*format == 'c')
-			{
-				char c = va_arg(args, int);
-				write(1, &c, 1);
-				count++;
-			}
-			else if (*format == 's')
-			{
-				char *str = va_arg(args, char *);
-				while (*str)
-				{
-					write(1, str, 1);
-					str++;
-					count++;
-				}
-			}
-			else if (*format == '%')
-			{
-				write(1, "%", 1);
-				write(1, format, 1);
-				count += 2;
-			}
+			count += putchar(*format);
 		}
-		format++;
+		++format;		
 	}
 	va_end(args);
 	return count;
+}
+
+int main(void)
+{
+	int number_of_chars_printed = _printf("This is a test string.\n");
+	printf("Number of characters printed: %d\n", number_of_chars_printed);
+	return (0);
 }
